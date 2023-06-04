@@ -15,12 +15,10 @@ import axios from "axios";
 const App = () => {
   const [todos, setTodos] = useState([]);
   const [inputValue, setInputValue] = useState("");
-  const [isChecked, setIsChecked] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [accordianChecked, setAccordianChecked] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(true);
   const [mode, setMode] = useState("input");
-  const [itemStatus, setItemStatus] = useState({});
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,6 +50,10 @@ const App = () => {
     fetchData();
   }, [todos, mode]);
 
+  const toggleAccordion = () => {
+    setIsOpen(!isOpen);
+  };
+
   const toggleMode = () => {
     // Toggle between input, Text1, and Text2
     if (mode === "input") {
@@ -76,38 +78,22 @@ const App = () => {
     }
   };
 
-  // const addTodo = () => {
-  //   if (inputValue.trim() !== "") {
-  //     setTodos([
-  //       ...todos,
-  //       { id: Date.now(), task: inputValue, status: isCompleted },
-  //     ]);
-  //     setInputValue("");
-  //   }
-  // };
-
   const removeTodo = async (id) => {
-    // setTodos(todos.filter((value) => value._id !== id));
     try {
       const response = await axios.delete(`http://localhost:8000/${id}`);
-      console.log(response.data);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleIconToggle = (id) => {
-    setIsChecked(!isChecked);
-    completedTask();
-    let status = "pending";
-    if (isCompleted === true) {
-      status = "completed";
+  const handleIconToggle = async (id) => {
+    try {
+      const response = await axios.put(`http://localhost:8000/${id}`, {
+        status: "completed",
+      });
+    } catch (error) {
+      console.log(error);
     }
-  };
-
-  const completedTask = () => {
-    setIsCompleted(!isCompleted);
-    console.log(isCompleted);
   };
 
   const handleChange = (e) => {
@@ -122,6 +108,14 @@ const App = () => {
     } catch (error) {
       console.log(error);
     }
+  };
+  const formattedDate = (date) => {
+    const doIt = date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+    return doIt;
   };
   return (
     <>
@@ -172,19 +166,18 @@ const App = () => {
             {isHidden ? null : (
               <ul>
                 {todos.map((value) => (
-                  <li key={value._id}>
+                  <li key={value._id} onClick={toggleAccordion}>
                     <Container>
                       <Row>
                         <Col>
-                          {isChecked ? (
+                          {value.status === "completed" ? (
                             <BsCheckCircleFill
-                              onClick={() => handleIconToggle(value.id)}
                               size={20}
                               style={{ color: "black" }}
                             />
                           ) : (
                             <BsCircle
-                              onClick={() => handleIconToggle(value.id)}
+                              onClick={() => handleIconToggle(value._id)}
                               size={20}
                               style={{ color: "black" }}
                             />
@@ -199,7 +192,22 @@ const App = () => {
                           />
                         </Col>
                       </Row>
+                      {isOpen && (
+                        <Container>
+                          <Row>
+                            <b>Start Time:</b> {value.startTime}
+                          </Row>
+                          <Row>
+                            <b>Completion Time:</b>
+                            {value.completionTime}
+                          </Row>
+                          <Row>
+                            <b>Status:</b> {value.status}
+                          </Row>
+                        </Container>
+                      )}
                     </Container>
+                    <hr />
                   </li>
                 ))}
               </ul>
