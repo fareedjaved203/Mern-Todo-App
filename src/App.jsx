@@ -28,7 +28,21 @@ const App = () => {
         // Make GET request to backend API
         const response = await axios.get("http://localhost:8000/");
         // Update component state with retrieved data
-        setTodos(response.data);
+        if (mode === "input") {
+          return setTodos(response.data);
+        } else if (mode === "pending") {
+          const showPending = response.data.filter((val) => {
+            return val.status === "pending";
+          });
+          console.log(`pending: ${showPending}`);
+          return setTodos(showPending);
+        } else {
+          const showCompleted = response.data.filter((val) => {
+            return val.status === "completed";
+          });
+          console.log(`completed: ${showCompleted}`);
+          return setTodos(showCompleted);
+        }
       } catch (error) {
         // Handle errors
         console.log("Error fetching data:", error);
@@ -36,14 +50,14 @@ const App = () => {
     };
 
     fetchData();
-  }, [todos]);
+  }, [todos, mode]);
 
   const toggleMode = () => {
     // Toggle between input, Text1, and Text2
     if (mode === "input") {
-      setMode("text1");
-    } else if (mode === "text1") {
-      setMode("text2");
+      setMode("completed");
+    } else if (mode === "completed") {
+      setMode("pending");
     } else {
       setMode("input");
     }
@@ -56,20 +70,21 @@ const App = () => {
 
   const handleKeyPress = (event) => {
     if (event.key === "Enter") {
-      addTodo();
+      // addTodo();
       sendDataToBackend();
-    }
-  };
-
-  const addTodo = () => {
-    if (inputValue.trim() !== "") {
-      setTodos([
-        ...todos,
-        { id: Date.now(), task: inputValue, status: isCompleted },
-      ]);
       setInputValue("");
     }
   };
+
+  // const addTodo = () => {
+  //   if (inputValue.trim() !== "") {
+  //     setTodos([
+  //       ...todos,
+  //       { id: Date.now(), task: inputValue, status: isCompleted },
+  //     ]);
+  //     setInputValue("");
+  //   }
+  // };
 
   const removeTodo = async (id) => {
     // setTodos(todos.filter((value) => value._id !== id));
@@ -88,18 +103,6 @@ const App = () => {
     if (isCompleted === true) {
       status = "completed";
     }
-    // setItemStatus((prevStatus) => ({
-    //   ...prevStatus,
-    //   [id]: !prevStatus[id], // Toggle the status for the item
-    // }));
-    // setTodos(
-    //   todos.map((val) => {
-    //     if (val.id === id) {
-    //       return { ...todos, status };
-    //     }
-    //     return val;
-    //   })
-    // );
   };
 
   const completedTask = () => {
@@ -144,8 +147,8 @@ const App = () => {
                       onChange={handleChange}
                     />
                   )}
-                  {mode === "text1" && <p>Completed Tasks</p>}
-                  {mode === "text2" && <p>Pending Tasks</p>}
+                  {mode === "completed" && <p>Completed Tasks</p>}
+                  {mode === "pending" && <p>Pending Tasks</p>}
                 </Col>
                 <Col>
                   {accordianChecked ? (
@@ -169,7 +172,7 @@ const App = () => {
             {isHidden ? null : (
               <ul>
                 {todos.map((value) => (
-                  <li key={value.id}>
+                  <li key={value._id}>
                     <Container>
                       <Row>
                         <Col>
