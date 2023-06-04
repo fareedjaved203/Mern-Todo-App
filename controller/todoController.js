@@ -1,43 +1,45 @@
-const axios = require("axios");
-const express = require("express");
-const router = express.Router();
-
 require("../db/conn");
 const Todo = require("../model/todoSchema");
 const User = require("../model/userSchema");
 
-router.get("/", (req, res) => {
-  res.send("Hello World");
-});
-
-router.post("/", async (req, res) => {
+const getData = async (req, res) => {
   try {
-    const { task } = req.body;
-    const todo = new Todo({ task, startTime, status });
-    const saveTodo = await todo.save();
-    res.json(saveTodo);
+    const data = await Todo.find();
+    res.json(data);
   } catch (error) {
-    res.status(501).json({ error: "Cannot Post Data" });
+    console.log(error);
   }
-});
+};
 
-router.put("/:id", async (req, res) => {
+const postData = async (req, res) => {
+  try {
+    const task = req.body.inputValue;
+    const todo = new Todo({ task });
+    const saveTodo = await todo.save();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const updateData = async (req, res) => {
   const { id } = req.params;
-  const completionTime = req.body;
+  const { status } = req.body;
+  const completionTime = Date.now();
   try {
     const todo = await Todo.findById(id);
     if (!todo) {
-      return res.status(404).json({ message: "Id Not Found" });
+      console.log("Id not Found");
     }
+    todo.status = status;
     todo.completionTime = completionTime;
     await todo.save();
-    return res.status(200).json({ message: "Object Updated Successfully" });
+    console.log("Successfully Updated");
   } catch (error) {
-    res.status(501).json({ error: "Cannot Update" });
+    console.log(error);
   }
-});
+};
 
-router.delete("/:id", async (req, res) => {
+const removeData = async (req, res) => {
   const { id } = req.params;
   try {
     const todo = await Todo.findByIdAndDelete(id);
@@ -48,13 +50,13 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     res.status(501).json({ error: "Cannot Delete" });
   }
-});
+};
 
-router.get("/user", (req, res) => {
+const getUser = (req, res) => {
   res.send("User Page");
-});
+};
 
-router.post("/user", async (req, res) => {
+const postUser = async (req, res) => {
   const { name, email, password, profilePic } = req.body;
   try {
     const user = new User({
@@ -67,11 +69,23 @@ router.post("/user", async (req, res) => {
     if (!userAdded) {
       return res.json({ message: "User Not Created" });
     } else {
+      const findAddedUser = await User.findOne({ email });
+      console.log(findAddedUser);
+      const todo = new Todo({ user: 2 });
+      const referUserToTodoList = await todo.save();
+      console.log(referUserToTodoList);
       return res.status(201).json({ message: "User Saved Successfully" });
     }
   } catch (error) {
     res.status(501).json({ message: "User Not Created" });
   }
-});
+};
 
-module.exports = router;
+module.exports = {
+  getData,
+  postData,
+  updateData,
+  removeData,
+  getUser,
+  postUser,
+};
