@@ -19,6 +19,7 @@ const App = () => {
   const [accordianChecked, setAccordianChecked] = useState(false);
   const [mode, setMode] = useState("input");
   const [isOpen, setIsOpen] = useState(false);
+  const [confirmId, setId] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,8 +51,9 @@ const App = () => {
     fetchData();
   }, [todos, mode]);
 
-  const toggleAccordion = () => {
+  const toggleAccordion = (id) => {
     setIsOpen(!isOpen);
+    setId(id);
   };
 
   const toggleMode = () => {
@@ -166,7 +168,10 @@ const App = () => {
             {isHidden ? null : (
               <ul>
                 {todos.map((value) => (
-                  <li key={value._id} onClick={toggleAccordion}>
+                  <li
+                    key={value._id}
+                    onClick={() => toggleAccordion(value._id)}
+                  >
                     <Container>
                       <Row>
                         <Col>
@@ -192,7 +197,7 @@ const App = () => {
                           />
                         </Col>
                       </Row>
-                      {isOpen && (
+                      {isOpen && confirmId === value._id && (
                         <Container>
                           <Row>
                             <b>Start Time:</b> {value.startTime}
