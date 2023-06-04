@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
+require("dotenv").config();
+const dbPassword = process.env.DB_PASSWORD;
 
-const DB =
-  "mongodb+srv://fareedjaved203:9U6SaqlibdkUssVV@cluster0.vj7htrg.mongodb.net/Cowlar_TodoList?retryWrites=true&w=majority";
+const DB = dbPassword;
 mongoose
   .connect(DB)
   .then(() => {
