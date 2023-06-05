@@ -16,6 +16,8 @@ Ignore the other branches!
 2) Delete Item from the Database
 3) Update the status of the Item (pending or completed)
 4) Category wise display showing both completed tasks, pending tasks and all tasks
+5) MongoDB Atlas is used
+6) Backend functionality for the user signup is added (because in the template there was an image that confused me)
 
 #Note:
 I tried unit testing using Jest, but couldn't perform it properly.
